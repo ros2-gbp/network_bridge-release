@@ -41,6 +41,16 @@ NetworkBridge::NetworkBridge(const std::string & node_name)
 : Node(node_name),
   loader_("network_bridge", "network_bridge::NetworkInterface") {}
 
+NetworkBridge::~NetworkBridge()
+{
+  network_interface_->close();
+  network_interface_.reset();
+
+  sub_mgrs_.clear();
+  timers_.clear();
+  publishers_.clear();
+}
+
 void NetworkBridge::initialize()
 {
   load_parameters();
@@ -139,6 +149,25 @@ void NetworkBridge::load_parameters()
       this->get_logger(),
       "Topic: %s, Rate: %f Hz", topic.c_str(), rate);
   }
+
+  network_check_timer_ = this->create_wall_timer(
+    std::chrono::milliseconds(500),
+    std::bind(&NetworkBridge::check_network_health, this));
+
+}
+
+void NetworkBridge::check_network_health()
+{
+  if (!network_interface_) {
+    initialize();
+    return;
+  }
+  if (network_interface_->has_failed()) {
+    RCLCPP_INFO(this->get_logger(), "Network interface has failed. Resetting");
+    network_interface_->close();
+    network_interface_->open();
+    return;
+  }
 }
 
 void NetworkBridge::load_network_interface()
@@ -215,6 +244,9 @@ void NetworkBridge::receive_data(std::span<const uint8_t> data)
     qos.transient_local();
     publishers_[topic] = this->create_generic_publisher(
       publish_namespace_ + topic, type, qos);
+    RCLCPP_INFO(
+      this->get_logger(), "Created publisher on %s type %s",
+      (publish_namespace_ + topic).c_str(), type.c_str());
   }
 
   rclcpp::SerializedMessage msg(payload.size());
@@ -234,10 +266,18 @@ void NetworkBridge::receive_data(std::span<const uint8_t> data)
 
 void NetworkBridge::send_data(std::shared_ptr<SubscriptionManager> manager)
 {
+  manager->check_subscription();
+  if (!manager->has_data()) {
+    return;
+  }
+  if (!network_interface_->is_ready()) {
+    return;
+  }
+
   const std::vector<uint8_t> & data = manager->get_data();
 
   if (data.empty()) {
-    RCLCPP_DEBUG(
+    RCLCPP_WARN(
       this->get_logger(),
       "SubscriptionManager %s has no data", manager->topic_.c_str());
     return;
@@ -375,12 +415,14 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   // Randomized name to avoid conflicts
-  std::srand(std::time(nullptr));
-  std::string node_name = "network_bridge" + std::to_string(std::rand());
-  auto node = std::make_shared<NetworkBridge>(node_name);
+  std::string node_name = "network_bridge" + std::to_string(::getpid());
 
+  auto node = std::make_shared<NetworkBridge>(node_name);
   node->initialize();
+
   rclcpp::spin(node);
+  node.reset();
+
   rclcpp::shutdown();
   return 0;
 }
