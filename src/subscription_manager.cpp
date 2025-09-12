@@ -41,17 +41,23 @@ SubscriptionManager::SubscriptionManager(
   publish_stale_data_(publish_stale_data),
   data_()
 {
+  topic_found_ = true;   // optimistic
   setup_subscription();
 }
 
 void SubscriptionManager::setup_subscription()
 {
+  if (!rclcpp::ok()) {return;} // Querying graph is fragile
+
   const auto all_topics_and_types = node_->get_topic_names_and_types();
 
   std::string topic = subscribe_namespace_ + topic_;
 
   if (all_topics_and_types.find(topic) == all_topics_and_types.end()) {
-    RCLCPP_DEBUG(node_->get_logger(), "Topic %s not found", topic.c_str());
+    if (topic_found_) {
+      RCLCPP_WARN(node_->get_logger(), "Topic %s not found", topic.c_str());
+    }
+    topic_found_ = false;
     return;
   }
 
@@ -59,12 +65,16 @@ void SubscriptionManager::setup_subscription()
   auto topic_info = node_->get_publishers_info_by_topic(topic);
 
   if (topic_info.size() == 0) {
-    RCLCPP_DEBUG(
-      node_->get_logger(),
-      "No publishers found for topic %s", topic.c_str());
+    if (topic_found_) {
+      RCLCPP_WARN(
+        node_->get_logger(),
+        "No publishers found for topic %s", topic.c_str());
+    }
+    topic_found_ = false;
     return;
   }
 
+  topic_found_ = true;
   auto qos_candidate = topic_info[0].qos_profile().get_rmw_qos_profile();
 
   rclcpp::QoS qos(rclcpp::QoSInitialization::from_rmw(qos_candidate));
@@ -110,28 +120,45 @@ void SubscriptionManager::callback(
   std::copy(buff, buff + serialized_msg->size(), data_.begin());
 }
 
+void SubscriptionManager::check_subscription()
+{
+  if (!subscriber) {
+    setup_subscription();
+  }
+}
+
+
+bool SubscriptionManager::has_data() const
+{
+  if (!subscriber) {
+    return false;
+  }
+  if (!received_msg_) {
+    return false;
+  }
+  if (is_stale_ && !publish_stale_data_) {
+    return false;
+  }
+  return true;
+}
+
+
 const std::vector<uint8_t> & SubscriptionManager::get_data()
 {
   if (!subscriber) {
     setup_subscription();
-    RCLCPP_DEBUG(
-      node_->get_logger(),
-      "Send Timer: Subscriber is not set");
+    RCLCPP_WARN(node_->get_logger(), "Send Timer: Subscriber is not set");
     return data_;
   }
 
   if (!received_msg_) {
-    RCLCPP_DEBUG(
-      node_->get_logger(),
-      "Send Timer: No message ever received");
+    RCLCPP_WARN(node_->get_logger(), "Send Timer: No message ever received");
     return data_;
   }
 
 
   if (is_stale_ && !publish_stale_data_) {
-    RCLCPP_DEBUG(
-      node_->get_logger(),
-      "Send Timer: Stored data is stale");
+    RCLCPP_WARN(node_->get_logger(), "Send Timer: Stored data is stale");
     data_.clear();
     return data_;
   }
