@@ -1,0 +1,12 @@
+Source: ros-humble-network-bridge
+Section: misc
+Priority: optional
+Maintainer: Ethan Brown <brow1633@purdue.edu>
+Build-Depends: debhelper (>= 9.0.0), libboost-system-dev, libzstd-dev, pkg-config, ros-humble-ament-cmake, ros-humble-ament-cmake-pytest <!nocheck>, ros-humble-ament-lint-auto <!nocheck>, ros-humble-ament-lint-common <!nocheck>, ros-humble-launch-testing <!nocheck>, ros-humble-launch-testing-ament-cmake <!nocheck>, ros-humble-launch-testing-ros <!nocheck>, ros-humble-pluginlib, ros-humble-rclcpp, ros-humble-std-msgs, ros-humble-tf2-msgs, ros-humble-tf2-ros, ros-humble-ros-workspace
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-humble-network-bridge
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-system-dev, libzstd-dev, ros-humble-pluginlib, ros-humble-rclcpp, ros-humble-std-msgs, ros-humble-tf2-msgs, ros-humble-tf2-ros, ros-humble-ros-workspace
+Description: Allows for arbitrary network links (UDP, TCP, etc) to bridge ROS2 messages
