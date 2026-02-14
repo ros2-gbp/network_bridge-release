@@ -1,0 +1,12 @@
+Source: ros-kilted-network-bridge
+Section: misc
+Priority: optional
+Maintainer: Ethan Brown <brow1633@purdue.edu>
+Build-Depends: debhelper (>= 9.0.0), libboost-system-dev, libzstd-dev, pkg-config, ros-kilted-ament-cmake, ros-kilted-ament-cmake-pytest <!nocheck>, ros-kilted-ament-lint-auto <!nocheck>, ros-kilted-ament-lint-common <!nocheck>, ros-kilted-launch-testing <!nocheck>, ros-kilted-launch-testing-ament-cmake <!nocheck>, ros-kilted-launch-testing-ros <!nocheck>, ros-kilted-pluginlib, ros-kilted-rclcpp, ros-kilted-std-msgs, ros-kilted-tf2-msgs, ros-kilted-tf2-ros, ros-kilted-ros-workspace
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-kilted-network-bridge
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-system-dev, libzstd-dev, ros-kilted-pluginlib, ros-kilted-rclcpp, ros-kilted-std-msgs, ros-kilted-tf2-msgs, ros-kilted-tf2-ros, ros-kilted-ros-workspace
+Description: Allows for arbitrary network links (UDP, TCP, etc) to bridge ROS2 messages
