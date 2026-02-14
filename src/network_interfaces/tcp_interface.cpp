@@ -56,8 +56,10 @@ void TcpInterface::load_parameters()
 
 void TcpInterface::open()
 {
+  shutting_down_ = false;
   failed_ = false;
   ready_ = false;
+  stream_.reset();
   io_context_.restart();
   if (role_ == "server") {
     setup_server();
@@ -90,6 +92,7 @@ bool TcpInterface::has_failed() const
 
 void TcpInterface::close()
 {
+  shutting_down_ = true;
   if (acceptor_) {
     acceptor_->close();
   }
@@ -102,11 +105,13 @@ void TcpInterface::close()
   try {
     packet_thread_.join();
   } catch (std::system_error &) {
+    // the thread was not started
   }
   io_context_.stop();
   try {
     io_thread_.join();
   } catch (std::system_error &) {
+    // the thread was not started
   }
 }
 
@@ -171,7 +176,7 @@ void TcpInterface::receive_thread()
 void TcpInterface::setup_server()
 {
   boost::system::error_code ec;
-  bool fatal = true;
+  bool fatal = !shutting_down_;
 
   tcp::endpoint endpoint(tcp::v4(), port_);
 
@@ -180,35 +185,41 @@ void TcpInterface::setup_server()
 
   acceptor_->open(endpoint.protocol(), ec);
   error_handler(ec, "Failed to open acceptor", fatal);
+  if (shutting_down_) {return;}
 
   acceptor_->set_option(tcp::acceptor::reuse_address(true), ec);
   error_handler(ec, "Failed to set acceptor option", fatal);
+  if (shutting_down_) {return;}
 
   acceptor_->bind(endpoint, ec);
   error_handler(ec, "Failed to bind acceptor", fatal);
+  if (shutting_down_) {return;}
 
   acceptor_->listen(tcp::socket::max_listen_connections, ec);
   error_handler(ec, "Failed to listen on acceptor", fatal);
+  if (shutting_down_) {return;}
 
   RCLCPP_INFO(node_->get_logger(), "Accepting connections");
   acceptor_->async_accept(
     *socket_,
     [this](const boost::system::error_code & ec) {
-      error_handler(ec, "Failed to accept connection", true);
-      RCLCPP_INFO(
-        node_->get_logger(),
-        "Accepted connection from %s:%u",
-        socket_->remote_endpoint().address().to_string().c_str(),
-        socket_->remote_endpoint().port());
-      ready_ = true;
-      start_receive();
+      error_handler(ec, "Failed to accept connection", !shutting_down_);
+      if (!shutting_down_) {
+        RCLCPP_INFO(
+          node_->get_logger(),
+          "Accepted connection from %s:%u",
+          socket_->remote_endpoint().address().to_string().c_str(),
+          socket_->remote_endpoint().port());
+        ready_ = true;
+        start_receive();
+      }
     });
 }
 
 void TcpInterface::setup_client()
 {
   boost::system::error_code ec;
-  bool fatal = true;
+  bool fatal = !shutting_down_;
 
   tcp::endpoint endpoint(
     address::from_string(remote_address_), port_);
@@ -240,11 +251,13 @@ void TcpInterface::error_handler(
   bool fatal)
 {
   if (ec) {
-    RCLCPP_ERROR(
-      node_->get_logger(), "%s: %s",
-      error_message.c_str(), ec.message().c_str());
+    if (!shutting_down_) {
+      RCLCPP_ERROR(
+        node_->get_logger(), "%s: %s",
+        error_message.c_str(), ec.message().c_str());
+    }
 
-    if (fatal) {
+    if (fatal && !shutting_down_) {
       RCLCPP_FATAL(node_->get_logger(), "fatal error, shutting down");
       rclcpp::shutdown();
       exit(1);
@@ -254,12 +267,14 @@ void TcpInterface::error_handler(
 
 void TcpInterface::start_receive()
 {
-  socket_->async_read_some(
-    boost::asio::buffer(receive_buffer_),
-    boost::bind(
-      &TcpInterface::receive, this,
-      boost::asio::placeholders::error,
-      boost::asio::placeholders::bytes_transferred));
+  if (socket_) {
+    socket_->async_read_some(
+      boost::asio::buffer(receive_buffer_),
+      boost::bind(
+        &TcpInterface::receive, this,
+        boost::asio::placeholders::error,
+        boost::asio::placeholders::bytes_transferred));
+  }
 }
 
 void TcpInterface::receive(const boost::system::error_code & error, size_t rlen)

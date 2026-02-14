@@ -14,6 +14,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(tf2_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(PkgConfig REQUIRED)
@@ -39,7 +41,11 @@ endif()
 
 include_directories(include)
 
-add_executable(network_bridge src/network_bridge.cpp src/subscription_manager.cpp)
+add_executable(network_bridge
+    src/network_bridge.cpp
+    src/subscription_manager.cpp
+    src/subscription_manager_tf.cpp
+)
 
 add_library(udp_interface SHARED
   src/network_interfaces/udp_interface.cpp
@@ -49,13 +55,26 @@ add_library(tcp_interface SHARED
   src/network_interfaces/tcp_interface.cpp
 )
 
-ament_target_dependencies(network_bridge pluginlib rclcpp std_msgs)
-ament_target_dependencies(udp_interface pluginlib rclcpp)
-ament_target_dependencies(tcp_interface pluginlib rclcpp)
+target_link_libraries(network_bridge PUBLIC
+  ${std_msgs_TARGETS}
+  ${tf2_msgs_TARGETS}
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  tf2_ros::tf2_ros
+  ${ZSTD_LIBRARIES}
+)
 
-target_link_libraries(network_bridge ${ZSTD_LIBRARIES})
-target_link_libraries(udp_interface ${Boost_LIBRARIES})
-target_link_libraries(tcp_interface ${Boost_LIBRARIES})
+target_link_libraries(udp_interface PUBLIC
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  ${Boost_LIBRARIES}
+)
+
+target_link_libraries(tcp_interface PUBLIC
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  ${Boost_LIBRARIES}
+)
 
 pluginlib_export_plugin_description_file(network_bridge network_interface_plugins.xml)
 
