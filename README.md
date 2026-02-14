@@ -1,3 +1,26 @@
+## network_bridge (humble) - 2.0.1-1
+
+The packages in the `network_bridge` repository were released into the `humble` distro by running `/usr/bin/bloom-release --rosdistro humble --track humble network_bridge` on `Sat, 14 Feb 2026 22:29:56 -0000`
+
+The `network_bridge` package was released.
+
+Version of package(s) in repository `network_bridge`:
+
+- upstream repository: https://github.com/brow1633/network_bridge.git
+- release repository: https://github.com/ros2-gbp/network_bridge-release.git
+- rosdistro version: `2.0.0-1`
+- old version: `2.0.0-3`
+- new version: `2.0.1-1`
+
+Versions of tools used:
+
+- bloom version: `0.13.0`
+- catkin_pkg version: `1.1.0`
+- rosdep version: `0.26.0`
+- rosdistro version: `1.0.1`
+- vcstools version: `0.1.42`
+
+
 ## network_bridge (rolling) - 2.0.1-1
 
 The packages in the `network_bridge` repository were released into the `rolling` distro by running `/usr/bin/bloom-release --rosdistro rolling --track rolling network_bridge` on `Sat, 14 Feb 2026 22:22:32 -0000`
