@@ -104,4 +104,5 @@ tracks:
     ros_distro: rolling
     vcs_type: git
     vcs_uri: https://github.com/brow1633/network_bridge.git
-    version: :{ask}
+    version: 3.0.0
+    version_saved: :{ask}
