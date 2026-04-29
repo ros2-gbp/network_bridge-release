@@ -1,1 +1,1 @@
-{"base": "75eeee45b78e", "parent": "debian/rolling/network_bridge", "previous": "7ed2bcfd0eb9", "trim": "", "trimbase": ""}
+{"base": "a4c4b18", "parent": "debian/lyrical/network_bridge", "previous": "5054f90", "trim": "", "trimbase": ""}
