@@ -1,3 +1,26 @@
+## network_bridge (kilted) - 3.1.0-1
+
+The packages in the `network_bridge` repository were released into the `kilted` distro by running `/usr/bin/bloom-release -y --no-web --ros-distro kilted --override-release-repository-push-url https://github.com/ros2-gbp/network_bridge-release.git --debug network_bridge` on `Mon, 12 Oct 2026 05:38:16 -0000`
+
+The `network_bridge` package was released.
+
+Version of package(s) in repository `network_bridge`:
+
+- upstream repository: https://github.com/brow1633/network_bridge.git
+- release repository: https://github.com/ros2-gbp/network_bridge-release.git
+- rosdistro version: `3.0.0-1`
+- old version: `3.0.0-1`
+- new version: `3.1.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.14.4`
+- catkin_pkg version: `1.1.1`
+- rosdep version: `0.27.0`
+- rosdistro version: `1.1.0`
+- vcstools version: `0.1.42`
+
+
 ## network_bridge (jazzy) - 3.1.0-1
 
 The packages in the `network_bridge` repository were released into the `jazzy` distro by running `/usr/bin/bloom-release -y --no-web --ros-distro jazzy --override-release-repository-push-url https://github.com/ros2-gbp/network_bridge-release.git --debug network_bridge` on `Mon, 12 Oct 2026 05:37:29 -0000`
