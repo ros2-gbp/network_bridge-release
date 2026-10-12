@@ -24,7 +24,7 @@ tracks:
     ros_distro: humble
     vcs_type: git
     vcs_uri: https://github.com/brow1633/network_bridge.git
-    version: :{ask}
+    version: :{auto}
   jazzy:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
@@ -50,7 +50,7 @@ tracks:
     ros_distro: jazzy
     vcs_type: git
     vcs_uri: https://github.com/brow1633/network_bridge.git
-    version: :{ask}
+    version: :{auto}
   kilted:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
@@ -76,7 +76,7 @@ tracks:
     ros_distro: kilted
     vcs_type: git
     vcs_uri: https://github.com/brow1633/network_bridge.git
-    version: :{ask}
+    version: :{auto}
   lyrical:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
@@ -104,7 +104,7 @@ tracks:
     ros_distro: lyrical
     vcs_type: git
     vcs_uri: https://github.com/brow1633/network_bridge.git
-    version: :{ask}
+    version: :{auto}
   rolling:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
@@ -132,4 +132,4 @@ tracks:
     ros_distro: rolling
     vcs_type: git
     vcs_uri: https://github.com/brow1633/network_bridge.git
-    version: :{ask}
+    version: :{auto}
