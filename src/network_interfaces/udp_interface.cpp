@@ -25,6 +25,9 @@ SOFTWARE.
 */
 
 #include "network_interfaces/udp_interface.hpp"
+#include "boost/format.hpp"
+using boost::format;
+using boost::str;
 
 namespace network_bridge
 {
@@ -107,9 +110,13 @@ void UdpInterface::setup_udp()
     "Setting up remote endpoint with address: %s and port: %u",
     remote_address_.c_str(), send_port_);
 
-  send_endpoint_ = udp::endpoint(
-    address::from_string(remote_address_, ec), send_port_);
+  udp::resolver resolver(io_context_);
+  auto send_endpoints = resolver.resolve(
+    udp::v4(), remote_address_, std::to_string(send_port_), ec);
   error_handler(ec, "Failed to parse remote address", fatal);
+
+  send_endpoint_ = send_endpoints.begin()->endpoint();
+
 
   RCLCPP_INFO(
     node_->get_logger(),
@@ -125,9 +132,11 @@ void UdpInterface::setup_udp()
     "Setting up local endpoint with address: %s and port: %u",
     local_address_.c_str(), receive_port_);
 
-  receive_endpoint_ = udp::endpoint(
-    address::from_string(local_address_, ec), receive_port_);
+  auto receive_endpoints = resolver.resolve(
+    udp::v4(), local_address_, std::to_string(receive_port_), ec);
   error_handler(ec, "Failed to parse local address", fatal);
+
+  receive_endpoint_ = receive_endpoints.begin()->endpoint();
 
   receive_socket_.bind(receive_endpoint_, ec);
   error_handler(ec, "Failed to bind receiving socket", fatal);
