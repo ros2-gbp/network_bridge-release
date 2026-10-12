@@ -1,0 +1,12 @@
+Source: ros-jazzy-network-bridge
+Section: misc
+Priority: optional
+Maintainer: "Ethan Brown" <brow1633@purdue.edu>
+Build-Depends: debhelper (>= 9.0.0), cppzmq-dev, libboost-all-dev, libzmq3-dev, libzstd-dev, pkg-config, ros-jazzy-ament-cmake, ros-jazzy-ament-cmake-gtest <!nocheck>, ros-jazzy-ament-cmake-pytest <!nocheck>, ros-jazzy-ament-lint-auto <!nocheck>, ros-jazzy-ament-lint-common <!nocheck>, ros-jazzy-launch-testing <!nocheck>, ros-jazzy-launch-testing-ament-cmake <!nocheck>, ros-jazzy-launch-testing-ros <!nocheck>, ros-jazzy-pluginlib, ros-jazzy-rclcpp, ros-jazzy-rclpy <!nocheck>, ros-jazzy-std-msgs, ros-jazzy-tf2-msgs, ros-jazzy-tf2-ros, ros-jazzy-ros-workspace
+Homepage: https://index.ros.org/p/network_bridge/#jazzy
+Standards-Version: 3.9.2
+
+Package: ros-jazzy-network-bridge
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, cppzmq-dev, libboost-all-dev, libzmq3-dev, libzstd-dev, ros-jazzy-ament-index-python, ros-jazzy-demo-nodes-cpp, ros-jazzy-launch-ros, ros-jazzy-pluginlib, ros-jazzy-rclcpp, ros-jazzy-std-msgs, ros-jazzy-tf2-msgs, ros-jazzy-tf2-ros, ros-jazzy-ros-workspace
+Description: Allows for arbitrary network links (UDP, TCP, etc) to bridge ROS2 messages
